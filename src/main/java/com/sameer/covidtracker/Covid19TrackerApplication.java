@@ -54,8 +54,8 @@ public class Covid19TrackerApplication {
         System.out.println("Spring boot application running in UTC timezone :"+new Date());   // It will print UTC timezone
     }
 	
-	@PostConstruct
-    @Scheduled(cron = "0 0 1 ? * *", zone = "UTC")
+	//@PostConstruct
+    @Scheduled(cron = "0 0 0 * * *", zone = "UTC")
     public void ScheduledFetchCoronaVirusData(){
 		// Create new Date 22-01-2020
 				@SuppressWarnings("deprecation")
