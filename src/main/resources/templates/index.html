@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COVID-19 Tracker Application</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+	integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw=="
+	crossorigin="anonymous" />
+<link
+	href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css"
+	rel="stylesheet" />
+<link href="css/styles.css" rel="stylesheet" />
+</head>
+<body>
+	<div class="head-div">
+		<!-- <img src="images/banner_top_plain.png"> -->
+		<div class="container">
+			<h1 class="head-title text-center mt-5 pt-2">COVID-19 Tracker
+				Application</h1>
+		</div>
+	</div>
+	<div class="container">
+		<!--  Main Container -->
+		<div class="row">
+			<div class="col-md-12">
+				<form>
+					<h2 class="text-center mt-5 mb-5">Covid-19 Report Data</h2>
+					<div class="row report-filter border rounded p-2 m-1 bg-light">
+						<h4 class="col-md-12 text-center mt-5 mb-5">Filter covid-19
+							report data</h4>
+						<div class="row align-items-center">
+							<div class="col-md-3 mx-auto date-filter">
+								<div class="form-group">
+									<label for="report-date">Covid-19 Report data for date</label>
+									<input type="date" name="date" id="report-date"
+										max="2021-12-31" min="2020-01-22" placeholder="mm/dd/yyyy"
+										class="form-control" th:value="${reportDate}"
+										onchange="this.form.submit();" aria-describedby="dateHelp">
+									<small id="dateHelp" class="form-text text-muted">Date
+										of the records you need.</small>
+								</div>
+							</div>
+
+							<div class="col-md-3 mx-auto state-filter">
+								<div class="form-group">
+									<label for="state">State</label> <select id="state"
+										name="state" class="select2" aria-describedby="stateHelp">
+										<option>None</option>
+										<option th:each="state: ${states}" th:value="${state}"
+											th:selected="${state == selectedState} ? true : false"
+											th:text="${state}"></option>
+									</select> <small id="stateHelp" class="form-text text-muted">Filter
+										data by state.</small>
+								</div>
+							</div>
+
+							<div class="col-md-3 mx-auto country-filter">
+								<div class="form-group">
+									<label for="country">Country</label> <select id="country"
+										name="country" class="select2" aria-describedby="countryHelp">
+										<option>None</option>
+										<option th:each="country: ${countries}" th:value="${country}"
+											th:selected="${country == selectedCountry} ? true : false"
+											th:text="${country}"></option>
+									</select> <small id="countryHelp" class="form-text text-muted">Filter
+										data by Country.</small>
+								</div>
+							</div>
+
+							<div class="col-md-3 mx-auto Entries-filter">
+								<div class="form-group">
+									<label for="entries">Entries per page</label> <input
+										th:value="${entries}" type="number" name="entries" min="10"
+										value="10" step="10" class="form-control" id="entries"
+										aria-describedby="entriesHelp"> <small
+										id="entriesHelp" class="form-text text-muted">Maximum
+										entries per page.</small>
+								</div>
+							</div>
+
+							<div class="col-md-3 mx-auto search-filter">
+								<div class="form-group">
+									<label for="entries">Search</label> <input type="text"
+										th:value="${keyword}" name="search" class="form-control"
+										id="entries" aria-describedby="entriesHelp"> <small
+										id="entriesHelp" class="form-text text-muted">Search
+										in entries.</small>
+								</div>
+							</div>
+						</div>
+						<div class="row col-12 align-items-center mt-3 mb-2">
+							<div
+								class="col-md-3 mx-auto submit-filter d-flex justify-content-center align-items-center">
+								<div class="form-group mb-0">
+									<button type="submit" class="btn btn-primary">Submit</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<input type="hidden" name="page" />
+				</form>
+
+
+
+				<div class="mb-5 mt-5">
+					<div class="row text-center border rounded mb-5 mt-5 p-5"
+						th:if="${#lists.isEmpty(covidReports)}">
+						<h4 class="col-12">No records found</h4>
+					</div>
+					<div id="table_wrapper"
+						class="dataTables_wrapper dt-bootstrap4 no-footer"
+						th:if="${not #lists.isEmpty(covidReports)}">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 class="col-12 text-center text-white mb-4 mt-2">Report
+									Data</h3>
+								<div th:if="${not #lists.isEmpty(covidReports)}">
+									<table
+										class="table table-responsive table-striped table-dark rounded"
+										id="table" data-toggle="table" data-search="true"
+										data-show-columns="true">
+										<thead>
+											<tr>
+												<th class="text-center" scope="col">State</th>
+												<th class="text-center" scope="col">Country</th>
+												<th class="text-center" scope="col">Confirmed</th>
+												<th class="text-center" scope="col">Deaths</th>
+												<th class="text-center" scope="col">Recovered</th>
+												<th class="text-center" scope="col">Active</th>
+												<th class="text-center" scope="col">Map</th>
+												<th class="text-center" scope="col">Combined_Key</th>
+												<th class="text-center" scope="col">Incidence_Rate</th>
+												<th class="text-center" scope="col">Case_Fatality_Ratio</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="covidReport : ${covidReports}">
+												<td class="text-center" th:text="${covidReport.State}"></td>
+												<td class="text-center" th:text="${covidReport.Country}"></td>
+												<td class="text-center" th:text="${covidReport.Confirmed}"></td>
+												<td class="text-center" th:text="${covidReport.Deaths}"></td>
+												<td class="text-center" th:text="${covidReport.Recovered}"></td>
+												<td class="text-center" th:text="${covidReport.Active}"></td>
+												<td class="text-center"><a target="_blank"
+													th:href="@{'https://www.google.com/maps?q=' + ${covidReport.lat} + ',' + ${covidReport.long_}}">map</a></td>
+												<td class="text-center"
+													th:text="${covidReport.Combined_Key}"></td>
+												<td class="text-center"
+													th:text="${covidReport.Incidence_Rate}"></td>
+												<td class="text-center"
+													th:text="${covidReport.Case_Fatality_Ratio}"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12 col-md-3">
+								<div class="dataTables_info text-white" id="table_info"
+									role="status" aria-live="polite">Showing
+									[[${numberOfElements}]] from [[${totalElements}]] entries</div>
+							</div>
+							<div class="col-sm-12 col-md-9">
+								<nav aria-label="Pagination" th:if="${totalPages gt 0}">
+									<ul
+										class="pagination justify-content-center font-weight-medium"
+										th:with="urlBuilder=${T(org.springframework.web.servlet.support.ServletUriComponentsBuilder)}">
+										<!-- First Page -->
+										<li class="paginate_button page-item next"
+											th:classappend="${firstPage} ? 'disabled' : ''"><a
+											class="page-link"
+											th:href="${urlBuilder.fromCurrentRequest().replaceQueryParam('page', 0).toUriString()}">First</a>
+										</li>
+
+										<!-- Previous Page -->
+										<li class="page-item"
+											th:classappend="${number eq 0} ? 'disabled'"><a
+											class="page-link svg-icon"
+											th:href="${urlBuilder.fromCurrentRequest().replaceQueryParam('page', number lt 2 ? 0 : number - 1).toUriString()}"
+											aria-label="Previous" title="Previous Page" rel="tooltip">
+												<svg width="1em" height="1em" viewBox="0 0 16 16"
+													class="bi bi-chevron-double-left" fill="currentColor"
+													xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd"
+														d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+  <path fill-rule="evenodd"
+														d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+</svg>
+										</a></li>
+
+										<!-- Append as has more pages empty link -->
+										<li class="page-item disabled" th:if="${number > 2}"><a
+											class="page-link svg-icon" href="#"> <svg width="1em"
+													height="1em" viewBox="0 0 16 16" class="bi bi-three-dots"
+													fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd"
+														d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+</svg>
+										</a></li>
+
+
+										<li class="page-item"
+											th:classappend="${i eq number + 1} ? 'active'"
+											th:each="i : ${#numbers.sequence( number - 1 > 0 ? number - 1 : 1, totalPages > 3 + number ? number + 3 : totalPages, 1)}">
+											<a class="page-link" th:text="${i}"
+											th:href="${urlBuilder.fromCurrentRequest().replaceQueryParam('page', i - 1 ).toUriString()}"
+											th:title="${'Page '+ i}" rel="tooltip"></a>
+										</li>
+
+										<!-- Append as has more pages empty link -->
+										<li class="page-item disabled"
+											th:if="${number + 3 < totalPages}"><a
+											class="page-link svg-icon" href="#"> <svg width="1em"
+													height="1em" viewBox="0 0 16 16" class="bi bi-three-dots"
+													fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd"
+														d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+</svg>
+										</a></li>
+
+
+										<!-- Next Page -->
+										<li class="page-item"
+											th:classappend="${number + 1 eq totalPages} ? 'disabled'">
+											<a class="page-link svg-icon"
+											th:href="${urlBuilder.fromCurrentRequest().replaceQueryParam('page', number + 1).toUriString()}"
+											aria-label="Next" title="Next Page" rel="tooltip"> <svg
+													width="1em" height="1em" viewBox="0 0 16 16"
+													class="bi bi-chevron-double-right" fill="currentColor"
+													xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd"
+														d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z" />
+  <path fill-rule="evenodd"
+														d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z" />
+</svg>
+										</a>
+										</li>
+										<!-- Last Page  -->
+										<li class="paginate_button page-item next"
+											th:classappend="${lastPage} ? 'disabled' : ''"><a
+											class="page-link"
+											th:href="${urlBuilder.fromCurrentRequest().replaceQueryParam('page', totalPages - 1).toUriString()}">Last</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer>
+		<div class="text-center bg-dark text-white mt-2 p-2">
+			<span>Made By <a href="https://narkhedesam.com">Sameer
+					Narkhede</a></span>
+		</div>
+		<!-- <img src="images/banner_bottom_plain.png"> -->
+	</footer>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+		integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"
+		integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ=="
+		crossorigin="anonymous"></script>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+
+
+	<script type="text/javascript">
+		$('.input-group.date').datepicker({
+			format : "mm/dd/yyyy",
+			startDate : "02/22/2020"
+		});
+		$(function() {
+			$('select').select2();
+		});
+
+		/* $(document).ready(function() {
+			$('#table').DataTable();
+		}); */
+	</script>
+</body>
+</html>
