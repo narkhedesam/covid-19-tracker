@@ -55,7 +55,7 @@ public class Covid19TrackerApplication {
     }
 	
 	//@PostConstruct
-    @Scheduled(cron = "0 0 0 * * *", zone = "UTC")
+    @Scheduled(cron = "0 0 3 * * *", zone = "UTC")
     public void ScheduledFetchCoronaVirusData(){
 		// Create new Date 22-01-2020
 				@SuppressWarnings("deprecation")
